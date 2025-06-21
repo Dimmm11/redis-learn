@@ -8,6 +8,7 @@ services:
       - "8087:8087"
     depends_on:
       - redis
+      - postgres-db
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - REDIS_HOST=redis
@@ -20,6 +21,21 @@ services:
     container_name: redis
     ports:
       - "6379:6379"
+    networks:
+      - dimmm-net
+
+  postgres-db:
+    image: postgres:16-alpine
+    container_name: postgres-db
+    ports:
+      - "5436:5432"
+    restart: always
+    environment:
+      - POSTGRES_DB=users-events
+      - POSTGRES_USER=dimmm
+      - POSTGRES_PASSWORD=12345
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
     networks:
       - dimmm-net
 
@@ -36,6 +52,7 @@ services:
 
 volumes:
   redis-insights-data:
+  postgres-data:
 
 networks:
   dimmm-net:
