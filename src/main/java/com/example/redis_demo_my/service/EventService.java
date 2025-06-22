@@ -5,6 +5,7 @@ import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventEntity;
 import com.example.redis_demo_my.model.mappers.EventMapper;
 import com.example.redis_demo_my.repository.EventRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -17,7 +18,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventMapper mapper;
 
-    public Event getById(Long id) {
+    public Event getById(@NonNull Long id) {
         return eventRepository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new RuntimeException("no event by id: " + id));
@@ -29,7 +30,7 @@ public class EventService {
                 .toList();
     }
 
-    public Event create(Event event) {
+    public Event create(@NonNull Event event) {
         EventEntity entityToSave = mapper.toEntity(event);
         return mapper.toDto(eventRepository.save(entityToSave));
     }

@@ -5,6 +5,7 @@ import com.example.redis_demo_my.model.dto.User;
 import com.example.redis_demo_my.model.entity.UserEntity;
 import com.example.redis_demo_my.model.mappers.UserMapper;
 import com.example.redis_demo_my.repository.UserRepository;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +19,7 @@ public class UserService {
     private final EventService eventService;
     private final UserMapper userMapper;
 
-
-    public User getById(Long id) {
+    public User getById(@NonNull Long id) {
         return userRepository.findById(id)
                 .map(userMapper::toDto)
                 .orElseThrow(() -> new UserNotFoundException(id.toString()));
