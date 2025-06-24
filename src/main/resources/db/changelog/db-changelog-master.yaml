@@ -1,5 +1,12 @@
 databaseChangeLog:
   - changeSet:
+      id: 0
+      author: dimmm
+      changes:
+        - sql:
+            splitStatements: false
+            sql: CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+  - changeSet:
       id: 1
       author: dimmm
       changes:
@@ -8,8 +15,8 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: BIGINT
-                  autoIncrement: true
+                  type: UUID
+                  defaultValueComputed: uuid_generate_v4()
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -22,8 +29,8 @@ databaseChangeLog:
             columns:
               - column:
                   name: id
-                  type: BIGINT
-                  autoIncrement: true
+                  type: UUID
+                  defaultValueComputed: uuid_generate_v4()
                   constraints:
                     primaryKey: true
                     nullable: false
@@ -33,13 +40,36 @@ databaseChangeLog:
               - column:
                   name: description
                   type: VARCHAR(50)
+
+        - createTable:
+            tableName: user_events
+            columns:
               - column:
                   name: user_id
-                  type: BIGINT
+                  type: UUID
+                  constraints:
+                    nullable: false
+              - column:
+                  name: event_id
+                  type: UUID
+                  constraints:
+                    nullable: false
 
         - addForeignKeyConstraint:
-            baseTableName: events
+            baseTableName: user_events
+            baseColumnNames: event_id
+            referencedTableName: events
+            referencedColumnNames: id
+            constraintName: fk_events
+
+        - addForeignKeyConstraint:
+            baseTableName: user_events
             baseColumnNames: user_id
             referencedTableName: users
             referencedColumnNames: id
-            constraintName: fk_events_user
+            constraintName: fk_users
+
+        - addPrimaryKey:
+            tableName: user_events
+            columnNames: user_id, event_id
+            constraintName: pk_user_events

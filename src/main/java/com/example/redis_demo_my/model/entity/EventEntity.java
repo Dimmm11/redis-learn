@@ -1,10 +1,11 @@
 package com.example.redis_demo_my.model.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -14,9 +15,11 @@ import lombok.NoArgsConstructor;
 import lombok.ToString;
 
 import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.UUID;
 
 import static jakarta.persistence.FetchType.EAGER;
-import static jakarta.persistence.GenerationType.IDENTITY;
 
 
 @NoArgsConstructor
@@ -27,14 +30,14 @@ import static jakarta.persistence.GenerationType.IDENTITY;
 @Table(name = "events")
 public class EventEntity implements Serializable {
     @Id
-    @GeneratedValue(strategy = IDENTITY)
-    private Long id;
+    @GeneratedValue(strategy = GenerationType.UUID)
+    @Column(name = "id", updatable = false, nullable = false)
+    private UUID id;
     private String name;
     private String description;
 
-    @ManyToOne(fetch = EAGER)
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
-    @EqualsAndHashCode.Exclude
+    @ManyToMany(mappedBy = "events", fetch = EAGER)
     @ToString.Exclude
-    private UserEntity user;
+    @EqualsAndHashCode.Exclude
+    private Set<UserEntity> users = new HashSet<>();
 }

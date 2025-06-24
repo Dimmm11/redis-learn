@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.StreamSupport;
 
 @Service
@@ -18,7 +19,7 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventMapper mapper;
 
-    public Event getById(@NonNull Long id) {
+    public Event getById(@NonNull UUID id) {
         return eventRepository.findById(id)
                 .map(mapper::toDto)
                 .orElseThrow(() -> new RuntimeException("no event by id: " + id));
@@ -44,7 +45,7 @@ public class EventService {
         return mapper.toDto(eventRepository.save(eventFromDb));
     }
 
-    public void deleteById(Long id) {
+    public void deleteById(UUID id) {
         eventRepository.deleteById(id);
     }
 

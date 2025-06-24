@@ -1,16 +1,22 @@
 package com.example.redis_demo_my.controller;
 
+import com.example.redis_demo_my.model.dto.CreateUserRequest;
 import com.example.redis_demo_my.model.dto.User;
 import com.example.redis_demo_my.service.UserService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/users")
@@ -25,12 +31,20 @@ public class UserController {
     }
 
     @GetMapping("/{id}")
-    public User getById(@PathVariable Long id) {
+    public User getById(@PathVariable UUID id) {
         return userService.getById(id);
     }
 
     @PostMapping
-    public User create(@RequestBody User user) {
-        return userService.create(user);
+    public User create(@RequestBody CreateUserRequest request) {
+        return userService.create(request);
     }
+
+    @DeleteMapping
+    @ResponseStatus(HttpStatus.OK)
+    public String deleteById(@RequestParam UUID id) {
+        userService.deleteById(id);
+        return "Deleted user: %s".formatted(id);
+    }
+
 }
