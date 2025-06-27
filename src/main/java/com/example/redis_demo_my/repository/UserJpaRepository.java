@@ -1,6 +1,6 @@
 package com.example.redis_demo_my.repository;
 
-import com.example.redis_demo_my.model.entity.UserEntity;
+import com.example.redis_demo_my.model.entity.UserJpaEntity;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.lang.NonNull;
@@ -11,13 +11,13 @@ import java.util.UUID;
 
 import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphType.LOAD;
 
-public interface UserRepository extends CrudRepository<UserEntity, UUID> {
+public interface UserJpaRepository extends CrudRepository<UserJpaEntity, UUID> {
 
     @EntityGraph(attributePaths = {"events"}, type = LOAD)
     @NonNull
-    Optional<UserEntity> findById(@NonNull UUID id);
+    Optional<UserJpaEntity> findById(@NonNull UUID id);
 
     @EntityGraph(attributePaths = {"events"}, type = LOAD)
     @NonNull
-    List<UserEntity> findAll();
+    List<UserJpaEntity> findAll();
 }

@@ -27,7 +27,7 @@ import static jakarta.persistence.FetchType.LAZY;
 @Data
 @Entity
 @Table(name = "users")
-public class UserEntity implements Serializable {
+public class UserJpaEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", nullable = false, updatable = false)
@@ -41,5 +41,5 @@ public class UserEntity implements Serializable {
             inverseJoinColumns = @JoinColumn(name = "event_id")
     )
     @EqualsAndHashCode.Exclude
-    private Set<EventEntity> events = new HashSet<>();
+    private Set<EventJpaEntity> events = new HashSet<>();
 }

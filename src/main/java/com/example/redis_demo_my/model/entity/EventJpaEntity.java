@@ -28,7 +28,7 @@ import static jakarta.persistence.FetchType.EAGER;
 @Data
 @Entity
 @Table(name = "events")
-public class EventEntity implements Serializable {
+public class EventJpaEntity implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id", updatable = false, nullable = false)
@@ -39,5 +39,5 @@ public class EventEntity implements Serializable {
     @ManyToMany(mappedBy = "events", fetch = EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private Set<UserEntity> users = new HashSet<>();
+    private Set<UserJpaEntity> users = new HashSet<>();
 }
