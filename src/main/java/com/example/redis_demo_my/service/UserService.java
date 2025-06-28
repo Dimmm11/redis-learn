@@ -20,7 +20,6 @@ import java.util.UUID;
 @Slf4j
 public class UserService {
     private final UserJpaRepository userJpaRepository;
-    private final EventService eventService;
     private final UserMapper userMapper;
     private final Transformer<CreateUserRequest, User> createUserRequestToUserTransformer;
 

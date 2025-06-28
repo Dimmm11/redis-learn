@@ -5,15 +5,12 @@ import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventJpaEntity;
 import com.example.redis_demo_my.model.mappers.EventMapper;
 import com.example.redis_demo_my.repository.EventJpaRepository;
-import com.example.redis_demo_my.repository.EventRedisRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
@@ -26,7 +23,7 @@ public class EventService {
     private final EventMapper mapper;
 
     public Event getById(@NonNull UUID id) {
-        return redisService.getById(id.toString())
+        return redisService.findOne(id.toString())
                 .orElseGet(() -> {
                     log.warn("no Event in Redis by id: {}", id);
                     return getFromDatabase(id);
@@ -54,16 +51,19 @@ public class EventService {
     }
 
     public Event update(Event event) {
+        log.info("updating event: {}. New description: {}", event.id(), event.description());
         EventJpaEntity eventFromDb = eventJpaRepository.findById(event.id())
                 .orElseThrow(() -> new EventNotFoundException(event.id().toString()));
-
         eventFromDb.setDescription(event.description());
-
-        return mapper.toDto(eventJpaRepository.save(eventFromDb));
+        EventJpaEntity saved = eventJpaRepository.save(eventFromDb);
+        Event dto = mapper.toDto(saved);
+        redisService.putToCache(dto);
+        return dto;
     }
 
     public void deleteById(UUID id) {
         eventJpaRepository.deleteById(id);
+        redisService.cacheEvict(id.toString());
     }
 
     private Event getFromDatabase(UUID id) {

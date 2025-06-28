@@ -4,7 +4,6 @@ import com.example.redis_demo_my.configuration.properties.RedisProperties;
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventRedisEntity;
 import com.example.redis_demo_my.model.mappers.EventMapper;
-import com.example.redis_demo_my.repository.EventRedisRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -23,25 +22,30 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class RedisService implements CrudOperations<Event> {
     private final RedisProperties redisProperties;
-    private final EventRedisRepository eventRedisRepository;
     private final EventMapper eventMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String EVENT_PREFIX = "Event:";
     private static final String EVENT_INDEXES = EVENT_PREFIX.concat("keys");
 
     @Override
-    public Optional<Event> getById(String id) {
+    public Optional<Event> findOne(String id) {
         log.info("loading Event from Redis: {}", id);
-        return eventRedisRepository.findById(id)
+        return Optional.ofNullable(
+                        redisTemplate.opsForValue()
+                                .get(buildRedisKey(id))
+                )
+                .map(obj -> (EventRedisEntity) obj)
                 .map(eventMapper::toDto);
     }
 
     @Override
     public List<Event> findAll() {
-        log.info("loading all events from Redis");
+        log.info("loading events from Redis");
         cleanExpiredKeys();
 
-        Set<String> keys = redisTemplate.opsForSet().members(EVENT_INDEXES).stream()
+        Set<String> keys = redisTemplate.opsForSet()
+                .members(EVENT_INDEXES)
+                .stream()
                 .map(String::valueOf)
                 .collect(Collectors.toSet());
 
@@ -57,8 +61,7 @@ public class RedisService implements CrudOperations<Event> {
     @Override
     public void putToCache(Event event) {
         EventRedisEntity entity = eventMapper.toRedisEntity(event);
-        EventRedisEntity saved = saveWithTtl(entity, getCurrentTtl());
-        eventMapper.toDto(saved);
+        saveWithTtl(entity, getCurrentTtl());
     }
 
     @Override
@@ -67,16 +70,15 @@ public class RedisService implements CrudOperations<Event> {
         list.forEach(this::putToCache);
     }
 
-    public EventRedisEntity saveWithTtl(EventRedisEntity entity, Duration ttl) {
+    public void saveWithTtl(EventRedisEntity entity, Duration ttl) {
         log.info("saving to Event to Redis: {}, ttl: {}", entity.getId(), ttl.get(ChronoUnit.SECONDS));
-        String redisKey = buildRedisKey(entity);
+        String redisKey = buildRedisKey(entity.getId().toString());
         redisTemplate.opsForValue().set(redisKey, entity, ttl);
         redisTemplate.opsForSet().add(EVENT_INDEXES, redisKey);
-        return entity;
     }
 
-    private static String buildRedisKey(EventRedisEntity event) {
-        return EVENT_PREFIX.concat(event.getId().toString());
+    private static String buildRedisKey(String id) {
+        return EVENT_PREFIX.concat(id);
     }
 
     public final Duration getCurrentTtl() {
@@ -88,17 +90,22 @@ public class RedisService implements CrudOperations<Event> {
                 .members(EVENT_INDEXES).stream()
                 .map(String::valueOf)
                 .collect(Collectors.toSet());
-        log.info("redis keySet: {}", String.join(", ", keys));
         List<String> expiredKeys = keys.stream()
                 .filter(key -> Boolean.FALSE.equals(redisTemplate.hasKey(key)))
                 .toList();
-        log.info("expired keys: {}", String.join(", ", expiredKeys));
-        redisTemplate.opsForSet()
-                .remove(EVENT_INDEXES, expiredKeys.toArray());
+        if (!expiredKeys.isEmpty()) {
+            redisTemplate.opsForSet()
+                    .remove(EVENT_INDEXES, expiredKeys.toArray());
+        }
     }
 
     @Override
-    public void cacheEvict(String key) {
-        throw new UnsupportedOperationException("not implemented yet");
+    public void cacheEvict(String entityId) {
+        String key = buildRedisKey(entityId);
+        Boolean isDeleted = redisTemplate.delete(key);
+        log.info("deleted from Redis: {}, success={}", key, isDeleted);
+
+        redisTemplate.opsForSet()
+                .remove(EVENT_INDEXES, key);
     }
 }
