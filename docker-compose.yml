@@ -25,6 +25,7 @@ services:
       - "6379:6379"
     networks:
       - dimmm-net
+    command: ["redis-server", "--save", "", "--appendonly", "no"]
 
   postgres-db:
     image: postgres:16-alpine

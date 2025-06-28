@@ -22,6 +22,4 @@ public class EventRedisEntity implements Serializable {
     private UUID id;
     private String name;
     private String description;
-    @TimeToLive
-    private Integer ttl;
 }

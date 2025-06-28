@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -33,9 +34,15 @@ public class EventService {
     }
 
     public List<Event> findAll() {
-        return StreamSupport.stream(eventJpaRepository.findAll().spliterator(), false)
-                .map(mapper::toDto)
-                .toList();
+        List<Event> events = redisService.findAll();
+        if (events.isEmpty()) {
+            log.info("loading all events from database");
+            events = StreamSupport.stream(eventJpaRepository.findAll().spliterator(), false)
+                    .map(mapper::toDto)
+                    .toList();
+            redisService.putAllToCache(events);
+        }
+        return events;
     }
 
     public Event create(@NonNull Event event) {
