@@ -6,6 +6,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
+import org.springframework.data.redis.core.TimeToLive;
 
 import java.io.Serializable;
 import java.util.UUID;
@@ -21,4 +22,6 @@ public class EventRedisEntity implements Serializable {
     private UUID id;
     private String name;
     private String description;
+    @TimeToLive
+    private Integer ttl;
 }

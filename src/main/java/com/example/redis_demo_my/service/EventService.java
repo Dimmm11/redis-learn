@@ -1,5 +1,6 @@
 package com.example.redis_demo_my.service;
 
+import com.example.redis_demo_my.configuration.properties.RedisProperties;
 import com.example.redis_demo_my.exception.EventNotFoundException;
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventJpaEntity;
@@ -10,7 +11,6 @@ import com.example.redis_demo_my.repository.EventRedisRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import java.time.Duration;
@@ -26,8 +26,8 @@ import java.util.stream.StreamSupport;
 public class EventService implements CacheCrudOperations<Event> {
     private final EventJpaRepository eventJpaRepository;
     private final EventRedisRepository eventRedisRepository;
-    private final RedisTemplate<String, Object> redisTemplate;
     private final EventMapper mapper;
+    private final RedisProperties redisProperties;
 
     public Event getById(@NonNull UUID id) {
         return getFromRedis(id)
@@ -66,15 +66,12 @@ public class EventService implements CacheCrudOperations<Event> {
 
     public EventRedisEntity saveWithTtl(EventRedisEntity entity, Duration ttl) {
         log.info("saving to Event to Redis: {}, ttl: {}", entity.getId(), ttl.get(ChronoUnit.SECONDS));
-        EventRedisEntity saved = eventRedisRepository.save(entity);
-        String key = "Event:".concat(entity.getId().toString());
-        redisTemplate.expire(key, ttl);
-        return saved;
+        return eventRedisRepository.save(entity);
     }
 
     private Optional<Event> getFromRedis(UUID id) {
         log.info("loading Event from Redis: {}", id);
-        return eventJpaRepository.findById(id)
+        return eventRedisRepository.findById(id.toString())
                 .map(mapper::toDto);
     }
 
@@ -90,8 +87,8 @@ public class EventService implements CacheCrudOperations<Event> {
 
     @Override
     public Event putToCache(Event event) {
-        log.info("adding Event to Redis: {}", event);
         EventRedisEntity entity = mapper.toRedisEntity(event);
+        entity.setTtl(redisProperties.getTtl());
         EventRedisEntity saved = saveWithTtl(entity, Duration.of(60, ChronoUnit.SECONDS));
         return mapper.toDto(saved);
     }
