@@ -1,10 +1,8 @@
 package com.example.redis_demo_my.service;
 
-import com.example.redis_demo_my.configuration.properties.RedisProperties;
 import com.example.redis_demo_my.exception.EventNotFoundException;
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventJpaEntity;
-import com.example.redis_demo_my.model.entity.EventRedisEntity;
 import com.example.redis_demo_my.model.mappers.EventMapper;
 import com.example.redis_demo_my.repository.EventJpaRepository;
 import com.example.redis_demo_my.repository.EventRedisRepository;
@@ -13,8 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.time.Duration;
-import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -23,14 +19,13 @@ import java.util.stream.StreamSupport;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-public class EventService implements CacheCrudOperations<Event> {
+public class EventService {
     private final EventJpaRepository eventJpaRepository;
-    private final EventRedisRepository eventRedisRepository;
+    private final RedisService redisService;
     private final EventMapper mapper;
-    private final RedisProperties redisProperties;
 
     public Event getById(@NonNull UUID id) {
-        return getFromRedis(id)
+        return redisService.getById(id.toString())
                 .orElseGet(() -> {
                     log.warn("no Event in Redis by id: {}", id);
                     return getFromDatabase(id);
@@ -47,7 +42,7 @@ public class EventService implements CacheCrudOperations<Event> {
         EventJpaEntity entityToSave = mapper.toJpaEntity(event);
         EventJpaEntity saved = eventJpaRepository.save(entityToSave);
         Event dto = mapper.toDto(saved);
-        putToCache(dto);
+        redisService.putToCache(dto);
         return mapper.toDto(saved);
     }
 
@@ -64,37 +59,15 @@ public class EventService implements CacheCrudOperations<Event> {
         eventJpaRepository.deleteById(id);
     }
 
-    public EventRedisEntity saveWithTtl(EventRedisEntity entity, Duration ttl) {
-        log.info("saving to Event to Redis: {}, ttl: {}", entity.getId(), ttl.get(ChronoUnit.SECONDS));
-        return eventRedisRepository.save(entity);
-    }
-
-    private Optional<Event> getFromRedis(UUID id) {
-        log.info("loading Event from Redis: {}", id);
-        return eventRedisRepository.findById(id.toString())
-                .map(mapper::toDto);
-    }
-
     private Event getFromDatabase(UUID id) {
         log.info("loading Event from db: {}", id);
         return eventJpaRepository.findById(id)
                 .map(jpaEntity -> {
                     Event dto = mapper.toDto(jpaEntity);
-                    return putToCache(dto);
+                    redisService.putToCache(dto);
+                    return dto;
                 })
                 .orElseThrow(() -> new RuntimeException("no event by id: " + id));
     }
 
-    @Override
-    public Event putToCache(Event event) {
-        EventRedisEntity entity = mapper.toRedisEntity(event);
-        entity.setTtl(redisProperties.getTtl());
-        EventRedisEntity saved = saveWithTtl(entity, Duration.of(60, ChronoUnit.SECONDS));
-        return mapper.toDto(saved);
-    }
-
-    @Override
-    public void cacheEvict(String key) {
-       throw new UnsupportedOperationException("cacheEvict not implemented");
-    }
 }
