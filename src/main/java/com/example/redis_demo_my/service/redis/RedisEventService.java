@@ -1,4 +1,4 @@
-package com.example.redis_demo_my.service;
+package com.example.redis_demo_my.service.redis;
 
 import com.example.redis_demo_my.configuration.properties.RedisProperties;
 import com.example.redis_demo_my.model.dto.Event;
@@ -20,12 +20,12 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class RedisService implements CrudOperations<Event> {
+public class RedisEventService implements RedisCrudOperations<Event, EventRedisEntity> {
     private final RedisProperties redisProperties;
     private final EventMapper eventMapper;
     private final RedisTemplate<String, Object> redisTemplate;
     private static final String EVENT_PREFIX = "Event:";
-    private static final String EVENT_INDEXES = EVENT_PREFIX.concat("keys");
+    private static final String EVENT_INDEXES = EVENT_PREFIX.concat(KEYS_SUFFIX);
 
     @Override
     public Optional<Event> findOne(String id) {
@@ -70,6 +70,7 @@ public class RedisService implements CrudOperations<Event> {
         list.forEach(this::putToCache);
     }
 
+    @Override
     public void saveWithTtl(EventRedisEntity entity, Duration ttl) {
         log.info("saving to Event to Redis: {}, ttl: {}", entity.getId(), ttl.get(ChronoUnit.SECONDS));
         String redisKey = buildRedisKey(entity.getId().toString());
@@ -77,15 +78,18 @@ public class RedisService implements CrudOperations<Event> {
         redisTemplate.opsForSet().add(EVENT_INDEXES, redisKey);
     }
 
-    private static String buildRedisKey(String id) {
+    @Override
+    public String buildRedisKey(String id) {
         return EVENT_PREFIX.concat(id);
     }
 
-    public final Duration getCurrentTtl() {
+    @Override
+    public Duration getCurrentTtl() {
         return Duration.of(redisProperties.getTtl(), ChronoUnit.SECONDS);
     }
 
-    private void cleanExpiredKeys() {
+    @Override
+    public void cleanExpiredKeys() {
         Set<String> keys = redisTemplate.opsForSet()
                 .members(EVENT_INDEXES).stream()
                 .map(String::valueOf)
