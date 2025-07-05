@@ -3,11 +3,11 @@ package com.example.redis_demo_my.service;
 import com.example.redis_demo_my.exception.EventNotFoundException;
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.model.entity.EventJpaEntity;
+import com.example.redis_demo_my.model.entity.EventRedisEntity;
 import com.example.redis_demo_my.model.mappers.EventMapper;
 import com.example.redis_demo_my.repository.EventJpaRepository;
-import com.example.redis_demo_my.service.redis.RedisEventService;
+import com.example.redis_demo_my.service.redis.RedisCrudOperations;
 import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -15,44 +15,57 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.StreamSupport;
 
+import static com.example.redis_demo_my.service.redis.RedisCrudOperations.CACHE_MISS;
+
 @Service
-@RequiredArgsConstructor
 @Slf4j
-public class EventService implements GenericService <Event, EventJpaEntity>{
+public class EventService implements GenericCrudService<Event> {
     private final EventJpaRepository eventJpaRepository;
-    private final RedisEventService redisEventService;
+    private final RedisCrudOperations<Event, EventRedisEntity> redis;
     private final EventMapper mapper;
 
-    public Event getById(@NonNull UUID id) {
-        return redisEventService.findOne(id.toString())
+    public EventService(EventJpaRepository eventJpaRepository,
+                        RedisCrudOperations<Event, EventRedisEntity> redis,
+                        EventMapper mapper) {
+        this.eventJpaRepository = eventJpaRepository;
+        this.redis = redis;
+        this.mapper = mapper;
+    }
+
+    @Override
+    public Event findOne(@NonNull UUID id) {
+        return redis.findOne(id.toString())
                 .orElseGet(() -> {
-                    log.warn("no Event in Redis by id: {}", id);
+                    log.warn(CACHE_MISS, redis.getEntityName(), id);
                     Event event = getFromDatabase(id);
-                    redisEventService.putToCache(event);
+                    redis.putToCache(event);
                     return event;
                 });
     }
 
+    @Override
     public List<Event> findAll() {
-        List<Event> events = redisEventService.findAll();
+        List<Event> events = redis.findAll();
         if (events.isEmpty()) {
             log.info("loading all events from database");
             events = StreamSupport.stream(eventJpaRepository.findAll().spliterator(), false)
                     .map(mapper::toDto)
                     .toList();
-            redisEventService.putAllToCache(events);
+            redis.putAllToCache(events);
         }
         return events;
     }
 
+    @Override
     public Event create(@NonNull Event event) {
         EventJpaEntity entityToSave = mapper.toJpaEntity(event);
         EventJpaEntity saved = eventJpaRepository.save(entityToSave);
         Event dto = mapper.toDto(saved);
-        redisEventService.putToCache(dto);
+        redis.putToCache(dto);
         return mapper.toDto(saved);
     }
 
+    @Override
     public Event update(Event event) {
         log.info("updating event: {}. New description: {}", event.id(), event.description());
         EventJpaEntity eventFromDb = eventJpaRepository.findById(event.id())
@@ -60,13 +73,14 @@ public class EventService implements GenericService <Event, EventJpaEntity>{
         eventFromDb.setDescription(event.description());
         EventJpaEntity saved = eventJpaRepository.save(eventFromDb);
         Event dto = mapper.toDto(saved);
-        redisEventService.putToCache(dto);
+        redis.putToCache(dto);
         return dto;
     }
 
-    public void deleteById(UUID id) {
+    @Override
+    public void delete(UUID id) {
         eventJpaRepository.deleteById(id);
-        redisEventService.cacheEvict(id.toString());
+        redis.cacheEvict(id.toString());
     }
 
     @Override

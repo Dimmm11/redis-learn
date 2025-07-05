@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @RequiredArgsConstructor
-@Service
+@Service("redisUserService")
 public class RedisUserService implements RedisCrudOperations<User, UserRedisEntity> {
     private final RedisProperties redisProperties;
     private final UserMapper userMapper;
@@ -41,10 +41,12 @@ public class RedisUserService implements RedisCrudOperations<User, UserRedisEnti
 
     @Override
     public Optional<User> findOne(String id) {
-        log.info("loading User from Redis: {}", id);
         return Optional.ofNullable(redisTemplate.opsForValue()
                         .get(buildRedisKey(id)))
-                .map(obj -> (UserRedisEntity) obj)
+                .map(obj -> {
+                    log.info(CACHE_HIT, getEntityName(), id);
+                    return (UserRedisEntity) obj;
+                })
                 .map(userMapper::toDto);
     }
 
@@ -75,7 +77,6 @@ public class RedisUserService implements RedisCrudOperations<User, UserRedisEnti
         redisTemplate.opsForSet()
                 .remove(USER_INDEXES, redisKey);
         redisTemplate.delete(redisKey);
-
     }
 
     @Override
@@ -114,5 +115,10 @@ public class RedisUserService implements RedisCrudOperations<User, UserRedisEnti
             redisTemplate.opsForSet()
                     .remove(USER_INDEXES, expiredKeys.toArray());
         }
+    }
+
+    @Override
+    public String getEntityName() {
+        return "User";
     }
 }

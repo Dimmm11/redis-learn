@@ -18,7 +18,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Service
+@Service("redisEventService")
 @RequiredArgsConstructor
 public class RedisEventService implements RedisCrudOperations<Event, EventRedisEntity> {
     private final RedisProperties redisProperties;
@@ -29,12 +29,14 @@ public class RedisEventService implements RedisCrudOperations<Event, EventRedisE
 
     @Override
     public Optional<Event> findOne(String id) {
-        log.info("loading Event from Redis: {}", id);
         return Optional.ofNullable(
                         redisTemplate.opsForValue()
                                 .get(buildRedisKey(id))
                 )
-                .map(obj -> (EventRedisEntity) obj)
+                .map(obj -> {
+                    log.info(CACHE_HIT, getEntityName(), id);
+                    return (EventRedisEntity) obj;
+                })
                 .map(eventMapper::toDto);
     }
 
@@ -111,5 +113,10 @@ public class RedisEventService implements RedisCrudOperations<Event, EventRedisE
 
         redisTemplate.opsForSet()
                 .remove(EVENT_INDEXES, key);
+    }
+
+    @Override
+    public String getEntityName() {
+        return "event";
     }
 }

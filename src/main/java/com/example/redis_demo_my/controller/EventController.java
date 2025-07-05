@@ -27,7 +27,7 @@ public class EventController {
 
     @GetMapping("/{id}")
     public Event getById(@PathVariable("id") UUID id) {
-        return eventService.getById(id);
+        return eventService.findOne(id);
     }
 
     @GetMapping
@@ -48,7 +48,7 @@ public class EventController {
     @DeleteMapping
     @ResponseStatus(HttpStatus.OK)
     public String delete(@RequestParam UUID id) {
-        eventService.deleteById(id);
+        eventService.delete(id);
         return "Event deleted: %s".formatted(id);
     }
 }
