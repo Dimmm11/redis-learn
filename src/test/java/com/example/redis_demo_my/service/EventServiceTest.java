@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,8 +36,7 @@ class EventServiceTest {
 
     @Test
     void findAll() {
-        UUID id = UUID.randomUUID();
-        event = new Event(id, "testName", "testDescription");
+        event = buildEvent();
 
         eventEntity = EventJpaEntity
                 .builder()
@@ -55,6 +55,31 @@ class EventServiceTest {
         assertNotNull(result);
         assertFalse(result.isEmpty());
         assertEquals(event.id(), result.get(0).id());
+    }
+
+    @Test
+    void findOne() {
+        event = buildEvent();
+        eventEntity = EventJpaEntity
+                .builder()
+                .id(event.id())
+                .name(event.name())
+                .description(event.description())
+                .build();
+        when(eventJpaRepository.findById(event.id())).thenReturn(Optional.of(eventEntity));
+        when(mapper.toDto(eventEntity)).thenReturn(event);
+
+        Event result = eventService.findOne(event.id());
+
+        assertNotNull(result);
+        assertEquals(event.id(), result.id());
+        assertEquals(event.name(), result.name());
+        assertEquals(event.description(), result.description());
+    }
+
+    private Event buildEvent() {
+        UUID id = UUID.randomUUID();
+        return new Event(id, "testName", "testDescription");
     }
 
 }
