@@ -38,12 +38,7 @@ class EventServiceTest {
     void findAll() {
         event = buildEvent();
 
-        eventEntity = EventJpaEntity
-                .builder()
-                .id(event.id())
-                .name(event.name())
-                .description(event.description())
-                .build();
+        eventEntity = mappedEntity(event);
         events = List.of(event);
 
         when(eventJpaRepository.findAll()).thenReturn(List.of(eventEntity));
@@ -60,12 +55,7 @@ class EventServiceTest {
     @Test
     void findOne() {
         event = buildEvent();
-        eventEntity = EventJpaEntity
-                .builder()
-                .id(event.id())
-                .name(event.name())
-                .description(event.description())
-                .build();
+        eventEntity = mappedEntity(event);
         when(eventJpaRepository.findById(event.id())).thenReturn(Optional.of(eventEntity));
         when(mapper.toDto(eventEntity)).thenReturn(event);
 
@@ -77,9 +67,30 @@ class EventServiceTest {
         assertEquals(event.description(), result.description());
     }
 
+    @Test
+    void create() {
+        event = buildEvent();
+        eventEntity = mappedEntity(event);
+
+        when(eventJpaRepository.save(eventEntity)).thenReturn(eventEntity);
+
+        Event result = eventService.create(event);
+
+        assertNotNull(result);
+    }
+
     private Event buildEvent() {
         UUID id = UUID.randomUUID();
         return new Event(id, "testName", "testDescription");
+    }
+
+    private EventJpaEntity mappedEntity(Event event) {
+        return EventJpaEntity
+                .builder()
+                .id(event.id())
+                .name(event.name())
+                .description(event.description())
+                .build();
     }
 
 }
