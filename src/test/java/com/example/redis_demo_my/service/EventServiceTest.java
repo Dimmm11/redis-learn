@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -35,15 +36,9 @@ class EventServiceTest {
 
     @Test
     void findAll() {
-        UUID id = UUID.randomUUID();
-        event = new Event(id, "testName", "testDescription");
+        event = buildEvent();
 
-        eventEntity = EventJpaEntity
-                .builder()
-                .id(event.id())
-                .name(event.name())
-                .description(event.description())
-                .build();
+        eventEntity = mappedEntity(event);
         events = List.of(event);
 
         when(eventJpaRepository.findAll()).thenReturn(List.of(eventEntity));
@@ -54,7 +49,50 @@ class EventServiceTest {
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(event.id(), result.get(0).id());
+        assertEquals(event.id(), result.getFirst().id());
+    }
+
+    @Test
+    void findOne() {
+        event = buildEvent();
+        eventEntity = mappedEntity(event);
+        when(eventJpaRepository.findById(event.id())).thenReturn(Optional.of(eventEntity));
+        when(mapper.toDto(eventEntity)).thenReturn(event);
+
+        Event result = eventService.findOne(event.id());
+
+        assertNotNull(result);
+        assertEquals(event.id(), result.id());
+        assertEquals(event.name(), result.name());
+        assertEquals(event.description(), result.description());
+    }
+
+    @Test
+    void create() {
+        event = buildEvent();
+        eventEntity = mappedEntity(event);
+
+        when(mapper.toJpaEntity(event)).thenReturn(eventEntity);
+        when(mapper.toDto(eventEntity)).thenReturn(event);
+        when(eventJpaRepository.save(eventEntity)).thenReturn(eventEntity);
+
+        Event result = eventService.create(event);
+
+        assertNotNull(result);
+    }
+
+    private Event buildEvent() {
+        UUID id = UUID.randomUUID();
+        return new Event(id, "testName", "testDescription");
+    }
+
+    private EventJpaEntity mappedEntity(Event event) {
+        return EventJpaEntity
+                .builder()
+                .id(event.id())
+                .name(event.name())
+                .description(event.description())
+                .build();
     }
 
 }
