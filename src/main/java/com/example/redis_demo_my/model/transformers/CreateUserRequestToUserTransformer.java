@@ -16,8 +16,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Component
 public class CreateUserRequestToUserTransformer implements Transformer<UserRequest, User> {
-    private final EventService eventService;
 
+    private final EventService eventService;
 
     @Override
     public User transform(UserRequest request) {
