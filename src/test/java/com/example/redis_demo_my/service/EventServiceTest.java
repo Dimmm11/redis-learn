@@ -49,7 +49,7 @@ class EventServiceTest {
 
         assertNotNull(result);
         assertFalse(result.isEmpty());
-        assertEquals(event.id(), result.get(0).id());
+        assertEquals(event.id(), result.getFirst().id());
     }
 
     @Test
@@ -72,6 +72,8 @@ class EventServiceTest {
         event = buildEvent();
         eventEntity = mappedEntity(event);
 
+        when(mapper.toJpaEntity(event)).thenReturn(eventEntity);
+        when(mapper.toDto(eventEntity)).thenReturn(event);
         when(eventJpaRepository.save(eventEntity)).thenReturn(eventEntity);
 
         Event result = eventService.create(event);
