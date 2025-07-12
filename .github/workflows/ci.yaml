@@ -1,5 +1,5 @@
 name: Redis learn CI pipeline
-
+# triggers
 on:
   push:
     branches:
@@ -9,12 +9,12 @@ on:
       - main
 
 jobs:
-  build:
+  build: #job name
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4 #action, which performs cloning of my code-repo into runner
 
       - name: Set up Jdk 21
         uses: actions/setup-java@v4
