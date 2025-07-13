@@ -22,7 +22,7 @@ jobs:
       - name: Invoke Lambda function
         run: |
           aws lambda invoke \
-            --function-name your-lambda-name \
+            --function-name ec2-trigger-github-deployment \
             --payload '{}' \
             --cli-binary-format raw-in-base64-out \
             lambda-response.json
