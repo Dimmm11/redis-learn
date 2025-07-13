@@ -19,10 +19,11 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION }}
 
-          inline: |
-            aws lambda invoke \
-              --function-name ec2-trigger-github-deployment \
-              --payload '{}' \
-              --cli-binary-format raw-in-base64-out \
-              response.json
-            cat response.json
+      - name: Invoke Lambda function
+        run: |
+          aws lambda invoke \
+            --function-name your-lambda-name \
+            --payload '{}' \
+            --cli-binary-format raw-in-base64-out \
+            lambda-response.json
+          cat lambda-response.json
