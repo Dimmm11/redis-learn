@@ -16,7 +16,7 @@ services:
     networks:
       - dimmm-net
     volumes:
-      - ~/.m2:/root/.m2
+      - /home/ec2-user/.m2:/root/.m2
     restart: unless-stopped
 
   redis:
