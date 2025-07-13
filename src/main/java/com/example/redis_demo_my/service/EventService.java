@@ -36,6 +36,7 @@ public class EventService implements GenericCrudService<Event> {
 
     @Override
     public List<Event> findAll() {
+        log.info("find all events");
         return StreamSupport.stream(eventJpaRepository.findAll().spliterator(), false)
                 .map(mapper::toDto)
                 .toList();
