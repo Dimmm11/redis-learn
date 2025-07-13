@@ -31,6 +31,7 @@ public class EventService implements GenericCrudService<Event> {
     @Override
     @Cacheable(cacheNames = EVENT, key = "#id")
     public Event findOne(@NonNull UUID id) {
+        log.info("find one!");
         return getFromDatabase(id);
     }
 
