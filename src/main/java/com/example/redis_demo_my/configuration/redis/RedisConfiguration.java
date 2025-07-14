@@ -1,6 +1,6 @@
-package com.example.redis_demo_my.configuration;
+package com.example.redis_demo_my.configuration.redis;
 
-import com.example.redis_demo_my.configuration.properties.RedisProperties;
+import com.example.redis_demo_my.configuration.redis.properties.RedisProperties;
 import com.example.redis_demo_my.utils.Constants;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;

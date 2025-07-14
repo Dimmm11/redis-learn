@@ -13,11 +13,14 @@ import static org.springframework.data.jpa.repository.EntityGraph.EntityGraphTyp
 
 public interface UserJpaRepository extends CrudRepository<UserJpaEntity, UUID> {
 
-    @EntityGraph(attributePaths = {"events"}, type = LOAD)
+    @EntityGraph(attributePaths = {"events", "roles"}, type = LOAD)
     @NonNull
     Optional<UserJpaEntity> findById(@NonNull UUID id);
 
-    @EntityGraph(attributePaths = {"events"}, type = LOAD)
+    @EntityGraph(attributePaths = {"events", "roles"}, type = LOAD)
     @NonNull
     List<UserJpaEntity> findAll();
+
+    @EntityGraph(attributePaths = {"roles"}, type = LOAD)
+    Optional<UserJpaEntity> findByName(String name);
 }

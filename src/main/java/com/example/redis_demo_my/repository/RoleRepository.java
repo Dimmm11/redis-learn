@@ -1,0 +1,14 @@
+package com.example.redis_demo_my.repository;
+
+import com.example.redis_demo_my.model.entity.RoleEntity;
+import com.example.redis_demo_my.model.enums.UserRole;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.UUID;
+@Repository
+public interface RoleRepository extends JpaRepository<RoleEntity, UUID> {
+    Optional<RoleEntity> findByName(UserRole name);
+
+}

@@ -3,9 +3,11 @@ package com.example.redis_demo_my.service;
 import com.example.redis_demo_my.exception.UserNotFoundException;
 import com.example.redis_demo_my.model.dto.User;
 import com.example.redis_demo_my.model.dto.UserRequest;
+import com.example.redis_demo_my.model.entity.RoleEntity;
 import com.example.redis_demo_my.model.entity.UserJpaEntity;
 import com.example.redis_demo_my.model.mappers.UserMapper;
 import com.example.redis_demo_my.model.transformers.Transformer;
+import com.example.redis_demo_my.repository.RoleRepository;
 import com.example.redis_demo_my.repository.UserJpaRepository;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -14,11 +16,14 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import static com.example.redis_demo_my.utils.Constants.USER;
 
@@ -27,8 +32,10 @@ import static com.example.redis_demo_my.utils.Constants.USER;
 @RequiredArgsConstructor
 public class UserService implements GenericCrudService<User> {
     private final UserJpaRepository userJpaRepository;
+    private final RoleRepository repository;
     private final UserMapper userMapper;
     private final Transformer<UserRequest, User> createUserRequestToUserTransformer;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Cacheable(cacheNames = USER, key = "#id")
@@ -51,6 +58,13 @@ public class UserService implements GenericCrudService<User> {
     @CachePut(cacheNames = USER, key = "#result.id", unless = "#result == null")
     public User create(User user) {
         UserJpaEntity entity = userMapper.toUserJpaEntity(user);
+        Set<RoleEntity> roles = user.roles().stream()
+                .map(role -> repository.findByName(role.getUserRole()))
+                .flatMap(Optional::stream)
+                .collect(Collectors.toSet());
+        entity.setRoles(roles);
+        entity.setPassword(passwordEncoder.encode(entity.getPassword()));
+
         UserJpaEntity saved = userJpaRepository.save(entity);
         log.info("saved user entity: [{}]", saved);
         return userMapper.toDto(saved);

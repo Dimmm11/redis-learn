@@ -1,4 +1,4 @@
-package com.example.redis_demo_my.configuration.properties;
+package com.example.redis_demo_my.configuration.redis.properties;
 
 import lombok.Getter;
 import lombok.Setter;
