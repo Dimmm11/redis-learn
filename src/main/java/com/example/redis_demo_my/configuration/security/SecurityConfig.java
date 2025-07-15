@@ -24,7 +24,8 @@ public class SecurityConfig {
                 .anyRequest().authenticated());
         http.csrf(AbstractHttpConfigurer::disable);
         http.formLogin(Customizer.withDefaults());
-        http.httpBasic(hbc -> hbc.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint(objectMapper)));
+        http.httpBasic(Customizer.withDefaults());
+        http.exceptionHandling(config -> config.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint(objectMapper)));
         return http.build();
     }
 
