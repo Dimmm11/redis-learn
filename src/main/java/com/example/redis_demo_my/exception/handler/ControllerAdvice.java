@@ -16,7 +16,8 @@ public class ControllerAdvice {
 
     @ExceptionHandler(RuntimeException.class)
     public ApiError handleRuntimeException(RuntimeException ex) {
-        printSelectiveStackTrace(ex, PACKAGE_PREFIX.split(".exception")[0], CAUSED_BY_PREFIX);
+//        printSelectiveStackTrace(ex, PACKAGE_PREFIX.split(".exception")[0], CAUSED_BY_PREFIX);
+        ex.printStackTrace();
         return ApiError.builder()
                 .error(ex.getClass().getName())
                 .message(ex.getMessage())

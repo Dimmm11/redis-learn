@@ -1,5 +1,6 @@
 package com.example.redis_demo_my.configuration.security;
 
+import com.example.redis_demo_my.exception.security.CustomAccessDeniedHandler;
 import com.example.redis_demo_my.exception.security.CustomBasicAuthenticationEntryPoint;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
@@ -17,15 +18,20 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final ObjectMapper objectMapper;
+
     @Bean
     public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers(HttpMethod.POST, "/users").permitAll()
+                .requestMatchers(HttpMethod.PUT).hasRole("ADMIN")
+                .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
                 .anyRequest().authenticated());
         http.csrf(AbstractHttpConfigurer::disable);
         http.formLogin(Customizer.withDefaults());
         http.httpBasic(Customizer.withDefaults());
-        http.exceptionHandling(config -> config.authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint(objectMapper)));
+        http.exceptionHandling(config -> config
+                .authenticationEntryPoint(new CustomBasicAuthenticationEntryPoint(objectMapper))
+                .accessDeniedHandler(new CustomAccessDeniedHandler(objectMapper)));
         return http.build();
     }
 
