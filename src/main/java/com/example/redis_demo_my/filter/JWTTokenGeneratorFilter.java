@@ -2,7 +2,6 @@ package com.example.redis_demo_my.filter;
 
 import com.example.redis_demo_my.configuration.properties.JwtProperties;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +16,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.stream.Collectors;
 
@@ -28,7 +26,7 @@ import static com.example.redis_demo_my.utils.Constants.USERNAME;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
+public class JWTTokenGeneratorFilter extends OncePerRequestFilter implements JwtTokenFilter{
     private final JwtProperties jwtProperties;
     static final String AUTH_PATH = "/auth";
 
@@ -36,9 +34,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication != null) {
-            String secret = jwtProperties.getSecret();
-            log.info("===jwt secret: {}", secret);
-            SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
+            SecretKey secretKey = getSecretKey();
             String jwt = buildJwt(authentication, secretKey);
             response.setHeader(AUTHORIZATION, jwt);
         }
@@ -48,6 +44,11 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
         return !request.getServletPath().equals(AUTH_PATH);
+    }
+
+    @Override
+    public JwtProperties getJwtProperties() {
+        return this.jwtProperties;
     }
 
     private String buildJwt(Authentication authentication, SecretKey secretKey) {

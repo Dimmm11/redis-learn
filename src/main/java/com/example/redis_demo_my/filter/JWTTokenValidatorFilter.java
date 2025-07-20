@@ -3,7 +3,6 @@ package com.example.redis_demo_my.filter;
 import com.example.redis_demo_my.configuration.properties.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -19,7 +18,6 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.crypto.SecretKey;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,7 +28,7 @@ import static com.example.redis_demo_my.utils.Constants.USERNAME;
 
 @RequiredArgsConstructor
 @Slf4j
-public class JWTTokenValidatorFilter extends OncePerRequestFilter {
+public class JWTTokenValidatorFilter extends OncePerRequestFilter implements JwtTokenFilter {
     private final JwtProperties jwtProperties;
 
     @Override
@@ -38,21 +36,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
         String jwt = request.getHeader(AUTHORIZATION);
         if (jwt != null) {
             try {
-                String secret = jwtProperties.getSecret();
-                log.info("=====jwt secret: {}", secret);
-                SecretKey secretKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
-                Claims claims = Jwts.parser()
-                        .verifyWith(secretKey)
-                        .build()
-                        .parseSignedClaims(jwt)
-                        .getPayload();
-
-                String username = claims.get(USERNAME, String.class);
-                String rolesString = claims.get(ROLES, String.class);
-                Set<SimpleGrantedAuthority> authorities = Arrays.stream(rolesString.split(";"))
-                        .map(SimpleGrantedAuthority::new)
-                        .collect(Collectors.toSet());
-                Authentication authentication = new UsernamePasswordAuthenticationToken(username, null, authorities);
+                SecretKey secretKey = getSecretKey();
+                Claims claims = getClaims(secretKey, jwt);
+                Authentication authentication = buildAuthentication(claims);
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (Exception ex) {
                 log.error(ex.getMessage());
@@ -65,5 +51,27 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter {
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) throws ServletException {
         return request.getServletPath().equals(JWTTokenGeneratorFilter.AUTH_PATH);
+    }
+
+    @Override
+    public JwtProperties getJwtProperties() {
+        return this.jwtProperties;
+    }
+
+    private Claims getClaims(SecretKey secretKey, String jwt) {
+        return Jwts.parser()
+                .verifyWith(secretKey)
+                .build()
+                .parseSignedClaims(jwt)
+                .getPayload();
+    }
+
+    private Authentication buildAuthentication(Claims claims) {
+        String username = claims.get(USERNAME, String.class);
+        String rolesString = claims.get(ROLES, String.class);
+        Set<SimpleGrantedAuthority> authorities = Arrays.stream(rolesString.split(";"))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toSet());
+        return new UsernamePasswordAuthenticationToken(username, null, authorities);
     }
 }
