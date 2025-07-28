@@ -22,7 +22,7 @@ spring:
 
   liquibase:
     enabled: true
-    change-log: classpath:db/changelog/db-changelog-master.yaml
+    change-log: classpath:db/changelog/db-changelog.yaml
 
   data:
     redis:
@@ -32,3 +32,8 @@ spring:
 
 server:
   port: 8087
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:SuperSecret1234567890-000000-2222222-00000-fdfdfddsfsfsdf}
+    ttl: 900
