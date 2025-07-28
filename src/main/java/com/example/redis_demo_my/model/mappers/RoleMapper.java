@@ -9,6 +9,8 @@ import org.mapstruct.Mapping;
 public interface RoleMapper {
     @Mapping(target = "userRole", source = "name")
     Role toDto(RoleEntity entity);
+
     @Mapping(target = "name", source = "userRole")
+    @Mapping(target = "users", ignore = true)
     RoleEntity toEntity(Role dto);
 }

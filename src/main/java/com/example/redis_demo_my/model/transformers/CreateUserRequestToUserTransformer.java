@@ -1,22 +1,23 @@
 package com.example.redis_demo_my.model.transformers;
 
-import com.example.redis_demo_my.model.dto.Event;
-import com.example.redis_demo_my.model.dto.Role;
-import com.example.redis_demo_my.model.dto.User;
-import com.example.redis_demo_my.model.dto.UserRequest;
-import com.example.redis_demo_my.model.enums.UserRole;
-import com.example.redis_demo_my.service.EventService;
-import com.example.redis_demo_my.service.RoleService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
+import org.springframework.stereotype.Component;
+
+import com.example.redis_demo_my.model.dto.Event;
+import com.example.redis_demo_my.model.dto.Role;
+import com.example.redis_demo_my.model.dto.User;
+import com.example.redis_demo_my.model.dto.UserRequest;
+import com.example.redis_demo_my.model.enums.UserRole;
+import com.example.redis_demo_my.service.EventService;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 
 @RequiredArgsConstructor

@@ -39,5 +39,6 @@ public class EventJpaEntity implements Serializable {
     @ManyToMany(mappedBy = "events", fetch = EAGER)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
+    @Builder.Default
     private Set<UserJpaEntity> users = new HashSet<>();
 }

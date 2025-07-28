@@ -45,8 +45,8 @@ public class SecurityConfig {
 
         http.sessionManagement(sessionConfig -> sessionConfig.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-        http.addFilterAfter(new JWTTokenGeneratorFilter(jwtProperties), BasicAuthenticationFilter.class);
-        http.addFilterBefore(new JWTTokenValidatorFilter(jwtProperties), BasicAuthenticationFilter.class);
+        http.addFilterAfter(new JWTTokenGeneratorFilter(jwtProperties, objectMapper), BasicAuthenticationFilter.class);
+        http.addFilterBefore(new JWTTokenValidatorFilter(jwtProperties, objectMapper), BasicAuthenticationFilter.class);
 
         return http.build();
     }

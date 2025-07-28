@@ -1,10 +1,7 @@
 package com.example.redis_demo_my.configuration.redis;
 
-import com.example.redis_demo_my.configuration.redis.properties.RedisProperties;
-import com.example.redis_demo_my.utils.Constants;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.time.Duration;
+
 import org.springframework.boot.autoconfigure.cache.RedisCacheManagerBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,7 +10,11 @@ import org.springframework.data.redis.serializer.GenericJackson2JsonRedisSeriali
 import org.springframework.data.redis.serializer.RedisSerializationContext;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
-import java.time.Duration;
+import com.example.redis_demo_my.configuration.redis.properties.RedisProperties;
+import com.example.redis_demo_my.utils.Constants;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Configuration
 @Slf4j
@@ -21,7 +22,6 @@ import java.time.Duration;
 public class RedisConfiguration {
 
     private final RedisProperties properties;
-    private final ObjectMapper objectMapper;
 
     @Bean
     public RedisCacheManagerBuilderCustomizer redisCacheManagerBuilderCustomizer() {
