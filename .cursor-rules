@@ -1,0 +1,38 @@
+# Dmytro's Coding Rules & Preferences
+
+## Java Standards
+- Use try-with-resources for all resource management
+- Prefer modern Java practices (streams, records, Optional)
+- Always add proper null checks before accessing objects
+- Use ObjectMapper for JSON instead of String.format()
+- Set UTF-8 charset explicitly for JSON responses
+- Don't close servlet response streams manually
+
+## Testing Standards
+- Use JUnit 5 + Mockito for unit tests
+- Descriptive test method names: `methodName_WhenCondition_ShouldResult`
+- Follow Given-When-Then structure in tests
+- Include both success and failure scenarios
+- Test edge cases and null inputs
+
+## Code Style
+- IntelliJ IDEA-style syntax highlighting preferences
+- Method names: Blue (#4FC1FF)
+- Variables/method calls: White (#FFFFFF)  
+- Fields: Purple (#9876AA)
+- Keywords: Orange (#CC7832)
+- Strings: Green (#6A8759)
+- Comments: Gray italic (#808080)
+
+## Architecture Preferences
+- Use Spring Boot best practices
+- Proper exception handling with custom exceptions
+- RESTful API design
+- Secure JWT implementation
+- Redis caching with appropriate annotations
+
+## IDE Settings
+- Auto-collapse imports by default
+- Show variable values inline during debugging
+- UTF-8 encoding everywhere
+- Auto-expand debug variables 
