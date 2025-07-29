@@ -46,7 +46,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter implements Jwt
 
             response.setContentType("application/json;charset=UTF-8");
             String json = objectMapper.writeValueAsString(Map.of("access_token", jwt));
-            response.getWriter().write(json);
+        response.getWriter().write(json);
             return; // Don't continue the filter chain after sending response
         }
         filterChain.doFilter(request, response);

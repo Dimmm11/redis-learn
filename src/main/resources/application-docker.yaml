@@ -37,3 +37,6 @@ app:
   jwt:
     secret: ${JWT_SECRET:SuperSecret1234567890-000000-2222222-00000-fdfdfddsfsfsdf}
     ttl: 900
+  oauth2:
+    client_id: ${GITHUB_CLIENT_ID:Iv23liXYJkyySjtr9gzf}
+    client_secret: ${GITHUB_CLIENT_SECRET:68da4c8ebde981f59b5375cff223cdf75139c55d}
