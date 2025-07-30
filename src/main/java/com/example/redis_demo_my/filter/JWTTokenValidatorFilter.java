@@ -41,8 +41,9 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter implements Jwt
             @NonNull HttpServletRequest request,
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain) throws ServletException, IOException {
-        String jwt = request.getHeader(AUTHORIZATION);
-        if (jwt != null) {
+        String authHeader = request.getHeader(AUTHORIZATION);
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            String jwt = authHeader.substring(7);
             try {
                 SecretKey secretKey = getSecretKey();
                 Claims claims = getClaims(secretKey, jwt);
