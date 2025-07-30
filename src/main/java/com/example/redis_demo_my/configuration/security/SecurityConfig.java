@@ -28,6 +28,10 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 import java.util.ArrayList;
 import java.util.List;
 
+import static org.springframework.http.HttpMethod.DELETE;
+import static org.springframework.http.HttpMethod.POST;
+import static org.springframework.http.HttpMethod.PUT;
+
 @Configuration
 @RequiredArgsConstructor
 @Slf4j
@@ -41,8 +45,9 @@ public class SecurityConfig {
 
         http.authorizeHttpRequests((requests) -> requests
                 .requestMatchers("/login").permitAll()
-                .requestMatchers(HttpMethod.PUT).hasRole("ADMIN")
-                .requestMatchers(HttpMethod.DELETE).hasRole("ADMIN")
+                .requestMatchers(POST, "/users").permitAll()
+                .requestMatchers(PUT).hasRole("ADMIN")
+                .requestMatchers(DELETE).hasRole("ADMIN")
                 .anyRequest().authenticated());
 
         http.csrf(AbstractHttpConfigurer::disable);
