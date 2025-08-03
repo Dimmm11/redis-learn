@@ -1,9 +1,13 @@
 databaseChangeLog:
   - changeSet:
-      id: 0
+      id: 5
       author: dimmm
       changes:
         - sql:
             sql: |
-              INSERT INTO users (id, name, password) 
-                select id, name, '{bcrypt}$2a$10$CqkimWruFIw3i6KPqP1pjOPxLaHzGXEwlG52r7jXog5QVtkvQHTwO' from roles where name = 'ADMIN';
+                  INSERT INTO users (id, name, password) 
+                  VALUES (uuid_generate_v4(), 'admin', '{bcrypt}$2a$10$CqkimWruFIw3i6KPqP1pjOPxLaHzGXEwlG52r7jXog5QVtkvQHTwO');
+                  INSERT INTO user_roles(user_id, role_id)
+                  VALUES 
+                    ((SELECT id FROM users WHERE name = 'admin'), 
+                     (SELECT id FROM roles WHERE name = 'ROLE_ADMIN'));

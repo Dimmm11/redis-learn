@@ -1,6 +1,6 @@
 databaseChangeLog:
   - changeSet:
-      id: 0
+      id: 2
       author: dimmm
       changes:
         - createTable:
@@ -51,11 +51,11 @@ databaseChangeLog:
             constraintName: pk_user_roles
 
   - changeSet:
-      id: 1
+      id: 3
       author: dimmm
       changes:
         - sql:
             sql: |
               INSERT INTO roles (id, name) VALUES
-                (uuid_generate_v4(), 'ADMIN'),
-                (uuid_generate_v4(), 'USER');
+                (uuid_generate_v4(), 'ROLE_ADMIN'),
+                (uuid_generate_v4(), 'ROLE_USER');
