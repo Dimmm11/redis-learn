@@ -10,12 +10,12 @@ services:
     depends_on:
       - redis
       - postgres-db
-    env_file:
-      - /home/ec2-user/.env
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - REDIS_HOST=redis
       - REDIS_PORT=6379
+      - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
+      - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
     networks:
       - dimmm-net
     volumes:
