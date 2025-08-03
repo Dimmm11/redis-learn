@@ -1,5 +1,6 @@
 package com.example.redis_demo_my.filter;
 
+import static com.example.redis_demo_my.utils.Constants.AUTH;
 import static com.example.redis_demo_my.utils.Constants.ROLES;
 import static com.example.redis_demo_my.utils.Constants.USERNAME;
 
@@ -34,7 +35,6 @@ import lombok.extern.slf4j.Slf4j;
 public class JWTTokenGeneratorFilter extends OncePerRequestFilter implements JwtTokenFilter {
     private final JwtProperties jwtProperties;
     private final ObjectMapper objectMapper;
-    public static final String AUTH_PATH = "/auth";
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request, @NonNull HttpServletResponse response,
@@ -54,7 +54,7 @@ public class JWTTokenGeneratorFilter extends OncePerRequestFilter implements Jwt
 
     @Override
     protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
-        return !request.getServletPath().equals(AUTH_PATH);
+        return !request.getServletPath().equals(AUTH);
     }
 
     @Override

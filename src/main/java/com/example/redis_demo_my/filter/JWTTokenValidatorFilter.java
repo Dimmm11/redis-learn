@@ -1,26 +1,6 @@
 package com.example.redis_demo_my.filter;
 
-import static com.example.redis_demo_my.utils.Constants.AUTHORIZATION;
-import static com.example.redis_demo_my.utils.Constants.ROLES;
-import static com.example.redis_demo_my.utils.Constants.USERNAME;
-
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.crypto.SecretKey;
-
-import org.springframework.lang.NonNull;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.filter.OncePerRequestFilter;
-
 import com.example.redis_demo_my.configuration.properties.JwtProperties;
-
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.servlet.FilterChain;
@@ -29,6 +9,28 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpMethod;
+import org.springframework.lang.NonNull;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.filter.OncePerRequestFilter;
+
+import javax.crypto.SecretKey;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.example.redis_demo_my.utils.Constants.AUTH;
+import static com.example.redis_demo_my.utils.Constants.AUTHORIZATION;
+import static com.example.redis_demo_my.utils.Constants.ROLES;
+import static com.example.redis_demo_my.utils.Constants.USERNAME;
+import static com.example.redis_demo_my.utils.Constants.USERS;
 
 @Slf4j
 @RequiredArgsConstructor
@@ -58,8 +60,10 @@ public class JWTTokenValidatorFilter extends OncePerRequestFilter implements Jwt
     }
 
     @Override
-    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) throws ServletException {
-        return request.getServletPath().equals(JWTTokenGeneratorFilter.AUTH_PATH);
+    protected boolean shouldNotFilter(@NonNull HttpServletRequest request) {
+        return Stream.of(AUTH, USERS)
+                .anyMatch(path -> Objects.equals(HttpMethod.POST.toString(), request.getMethod())
+                        && Objects.equals(path, request.getServletPath()));
     }
 
     @Override

@@ -5,3 +5,5 @@ databaseChangeLog:
       file: db/changelog/add-roles.yaml
   - include:
       file: db/changelog/users-add-password.yaml
+  - include:
+      file: db/changelog/add-admin.yaml

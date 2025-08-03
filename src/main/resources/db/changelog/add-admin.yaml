@@ -1,0 +1,9 @@
+databaseChangeLog:
+  - changeSet:
+      id: 0
+      author: dimmm
+      changes:
+        - sql:
+            sql: |
+              INSERT INTO users (id, name, password) 
+                select id, name, '{bcrypt}$2a$10$CqkimWruFIw3i6KPqP1pjOPxLaHzGXEwlG52r7jXog5QVtkvQHTwO' from roles where name = 'ADMIN';
