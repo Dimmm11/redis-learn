@@ -11,6 +11,10 @@ spring:
     username: dimmm
     password: 12345
     driver-class-name: org.postgresql.Driver
+    hikari:
+      connection-timeout: 30000
+      maximum-pool-size: 5
+      initialization-fail-timeout: 0
 
   jpa:
     hibernate:
