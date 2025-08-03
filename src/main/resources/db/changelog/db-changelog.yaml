@@ -1,6 +1,6 @@
 databaseChangeLog:
   - include:
-      file: db/changelog/db-changelog-master.yaml
+      file: db/changelog/users-events.yaml
   - include:
       file: db/changelog/add-roles.yaml
   - include:
