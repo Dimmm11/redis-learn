@@ -47,17 +47,6 @@ services:
     networks:
       - dimmm-net
 
-  redis-insights:
-    image: redis/redisinsight:latest
-    container_name: redis-insight
-    ports:
-      - "5540:5540"
-    networks:
-      - dimmm-net
-    restart: always
-    volumes:
-      - redis-insights-data:/data
-
 volumes:
   redis-insights-data:
   postgres-data:
