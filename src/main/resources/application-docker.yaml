@@ -41,6 +41,16 @@ app:
   jwt:
     secret: ${JWT_SECRET:SuperSecret1234567890-000000-2222222-00000-fdfdfddsfsfsdf}
     ttl: 900
+
   oauth2:
     client_id: ${GITHUB_CLIENT_ID}
     client_secret: ${GITHUB_CLIENT_SECRET}
+
+  kafka:
+    group-id: ${KAFKA_CONSUMER_GROUP_ID:events-consumer-group}
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:kafka-broker:9092}
+    trusted-packages: com.example.redis_demo_my.*
+    topic:
+      name: ${KAFKA_TOPIC_NAME:events}
+      partitions: ${KAFKA_TOPIC_PARTITIONS:1}
+      replicas: ${KAFKA_TOPIC_REPLICAS:1}

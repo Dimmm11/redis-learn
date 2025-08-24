@@ -10,6 +10,7 @@ services:
     depends_on:
       - redis
       - postgres-db
+      - kafka
     environment:
       - SPRING_PROFILES_ACTIVE=docker
       - REDIS_HOST=redis
@@ -21,6 +22,25 @@ services:
     volumes:
       - /home/ec2-user/.m2:/root/.m2
     restart: unless-stopped
+
+  kafka:
+    image: apache/kafka:latest
+    container_name: kafka-broker
+    ports:
+      - "9092:9092"
+    networks:
+      - dimmm-net
+    environment:
+      - KAFKA_PROCESS_ROLES=broker,controller
+      - KAFKA_NODE_ID=1
+      - KAFKA_LISTENERS=PLAINTEXT://0.0.0.0:9092,CONTROLLER://0.0.0.0:9093
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka-broker:9092,EXTERNAL://localhost:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT,EXTERNAL:PLAINTEXT
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka-broker:9093
+    volumes:
+      - kafka-data:/var/lib/kafka/data
 
   redis:
     image: redis:latest
@@ -48,8 +68,8 @@ services:
       - dimmm-net
 
 volumes:
-  redis-insights-data:
   postgres-data:
+  kafka-data:
 
 networks:
   dimmm-net:
