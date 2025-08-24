@@ -47,12 +47,11 @@ public class KafkaConfiguration {
     @Bean
     DefaultKafkaConsumerFactory<String, Event> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, kafkaProperties.getTrustedPackages());
-        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
+        return new DefaultKafkaConsumerFactory<>(props, null,
                 new JsonDeserializer<>(Event.class, false));
     }
 
