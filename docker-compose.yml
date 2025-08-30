@@ -17,6 +17,7 @@ services:
       - REDIS_PORT=6379
       - GITHUB_CLIENT_ID=${GITHUB_CLIENT_ID}
       - GITHUB_CLIENT_SECRET=${GITHUB_CLIENT_SECRET}
+      - JAVA_OPTS=-Djava.net.preferIPv4Stack=true
     networks:
       - dimmm-net
     volumes:

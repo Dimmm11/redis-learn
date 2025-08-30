@@ -2,6 +2,7 @@ package com.example.redis_demo_my.controller;
 
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.service.EventService;
+import com.example.redis_demo_my.service.kafka.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -24,6 +25,7 @@ import java.util.UUID;
 public class EventController {
 
     private final EventService eventService;
+    private final KafkaProducer kafkaProducer;
 
     @GetMapping("/{id}")
     public Event getById(@PathVariable("id") UUID id) {
@@ -36,8 +38,9 @@ public class EventController {
     }
 
     @PostMapping
-    public Event create(@RequestBody Event event) {
-        return eventService.create(event);
+    public String create(@RequestBody Event event) {
+        kafkaProducer.sendMessage(event);
+        return "Event sent to Kafka: %s".formatted(event);
     }
 
     @PutMapping

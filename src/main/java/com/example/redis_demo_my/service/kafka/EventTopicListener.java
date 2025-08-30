@@ -15,9 +15,9 @@ public class EventTopicListener {
     private final KafkaProperties kafkaProperties;
     private final EventService eventService;
 
-    @KafkaListener(topics = "#{kafkaProperties.topic.name}")
+    @KafkaListener(topics = "#{kafkaProperties.topic.name}", groupId = "#{kafkaProperties.groupId}")
     public void processMessage(Event event) {
-      log.info(" <<===== Received event: {}", event);
+      log.info(" <<===== Received event: {}, calling EventService to save", event);
       eventService.create(event);
     }
 }

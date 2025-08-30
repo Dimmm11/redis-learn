@@ -11,4 +11,4 @@ RUN mvn clean package -DskipTests
 FROM eclipse-temurin:21-alpine
 WORKDIR /app
 COPY --from=build_phase /app/target/*.jar packaged-app.jar
-ENTRYPOINT ["java", "-agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005", "-jar", "packaged-app.jar"]
+ENTRYPOINT ["sh", "-c", "java $JAVA_OPTS -agentlib:jdwp=transport=dt_socket,server=y,suspend=n,address=*:5005 -jar packaged-app.jar"]
