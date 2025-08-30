@@ -15,7 +15,7 @@ public class EventTopicListener {
     private final KafkaProperties kafkaProperties;
     private final EventService eventService;
 
-    @KafkaListener(topics = "#{@kafkaProperties.topic.name}")
+    @KafkaListener(topics = "#{kafkaProperties.topic.name}")
     public void processMessage(Event event) {
       log.info(" <<===== Received event: {}", event);
       eventService.create(event);

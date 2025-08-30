@@ -12,6 +12,7 @@ import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
@@ -35,27 +36,29 @@ public class KafkaConfiguration {
         log.info("KafkaProperties initialized successfully: {}", kafkaProperties);
     }
 
-    @Bean
-    NewTopic createTopic() {
-        return TopicBuilder
-                .name(kafkaProperties.getTopic().getName())
-                .partitions(kafkaProperties.getTopic().getPartitions())
-                .replicas(kafkaProperties.getTopic().getReplicas())
-                .build();
-    }
+//    @Bean
+//    NewTopic createTopic() {
+//        return TopicBuilder
+//                .name(kafkaProperties.getTopic().getName())
+//                .partitions(kafkaProperties.getTopic().getPartitions())
+//                .replicas(kafkaProperties.getTopic().getReplicas())
+//                .build();
+//    }
 
     @Bean
     DefaultKafkaConsumerFactory<String, Event> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, JsonDeserializer.class);
+        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, kafkaProperties.getBootstrapServers());
         props.put(ConsumerConfig.GROUP_ID_CONFIG, kafkaProperties.getGroupId());
         props.put(JsonDeserializer.TRUSTED_PACKAGES, kafkaProperties.getTrustedPackages());
-        return new DefaultKafkaConsumerFactory<>(props, null,
+        return new DefaultKafkaConsumerFactory<>(props, new StringDeserializer(),
                 new JsonDeserializer<>(Event.class, false));
     }
 
     @Bean
+//    @DependsOn("createTopic")
     ConcurrentKafkaListenerContainerFactory<String, Event> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Event> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
