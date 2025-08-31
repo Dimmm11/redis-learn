@@ -1,6 +1,5 @@
-package com.example.redis_demo_my.service.kafka;
+package com.example.redis_demo_my.service.kafka.producer;
 
-import com.example.redis_demo_my.configuration.properties.KafkaProperties;
 import com.example.redis_demo_my.model.dto.Event;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,13 +11,12 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class KafkaProducer implements MessageProducer<Event> {
 
-    private final KafkaProperties kafkaProperties;
     private final KafkaTemplate<String, Event> kafkaTemplate;
 
     @Override
     public void sendMessage(Event message) {
         try {
-            log.info("__________Sending message='{}' to topic='{}'", message, kafkaProperties.getTopic());
+            log.info("=====>> Sending message='{}'", message);
             kafkaTemplate.sendDefault(message);
         } catch (Exception e) {
             log.error("Error sending message to kafka", e);

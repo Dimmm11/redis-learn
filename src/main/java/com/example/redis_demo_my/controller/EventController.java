@@ -2,7 +2,7 @@ package com.example.redis_demo_my.controller;
 
 import com.example.redis_demo_my.model.dto.Event;
 import com.example.redis_demo_my.service.EventService;
-import com.example.redis_demo_my.service.kafka.KafkaProducer;
+import com.example.redis_demo_my.service.kafka.producer.KafkaProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;

@@ -1,4 +1,4 @@
-package com.example.redis_demo_my.service.kafka;
+package com.example.redis_demo_my.service.kafka.consumer;
 
 import com.example.redis_demo_my.configuration.properties.KafkaProperties;
 import com.example.redis_demo_my.model.dto.Event;
@@ -11,13 +11,14 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class EventTopicListener {
+public class EventKafkaConsumer implements MessageConsumer<Event> {
     private final KafkaProperties kafkaProperties;
     private final EventService eventService;
 
     @KafkaListener(topics = "#{kafkaProperties.topic.name}", groupId = "#{kafkaProperties.groupId}")
-    public void processMessage(Event event) {
-      log.info(" <<===== Received event: {}, calling EventService to save", event);
-      eventService.create(event);
+    @Override
+    public void consumeMessage(Event event) {
+        log.info("=====>> Received event: {}, calling EventService to save", event);
+        eventService.create(event);
     }
 }

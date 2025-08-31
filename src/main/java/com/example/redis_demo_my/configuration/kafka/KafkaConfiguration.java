@@ -5,16 +5,13 @@ import com.example.redis_demo_my.model.dto.Event;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
 import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.DependsOn;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
-import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaProducerFactory;
 import org.springframework.kafka.core.KafkaTemplate;
@@ -36,15 +33,6 @@ public class KafkaConfiguration {
         log.info("KafkaProperties initialized successfully: {}", kafkaProperties);
     }
 
-//    @Bean
-//    NewTopic createTopic() {
-//        return TopicBuilder
-//                .name(kafkaProperties.getTopic().getName())
-//                .partitions(kafkaProperties.getTopic().getPartitions())
-//                .replicas(kafkaProperties.getTopic().getReplicas())
-//                .build();
-//    }
-
     @Bean
     DefaultKafkaConsumerFactory<String, Event> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
@@ -58,7 +46,6 @@ public class KafkaConfiguration {
     }
 
     @Bean
-//    @DependsOn("createTopic")
     ConcurrentKafkaListenerContainerFactory<String, Event> kafkaListenerContainerFactory() {
         ConcurrentKafkaListenerContainerFactory<String, Event> factory = new ConcurrentKafkaListenerContainerFactory<>();
         factory.setConsumerFactory(consumerFactory());
@@ -76,6 +63,8 @@ public class KafkaConfiguration {
 
     @Bean
     KafkaTemplate<String, Event> kafkaTemplate() {
-        return new KafkaTemplate<>(producerFactory());
+        KafkaTemplate<String, Event> kafkaTemplate = new KafkaTemplate<>(producerFactory());
+        kafkaTemplate.setDefaultTopic(kafkaProperties.getTopic().getName());
+        return kafkaTemplate;
     }
 }

@@ -48,17 +48,18 @@ public class EventService implements GenericCrudService<Event> {
     public Event create(@NonNull Event event) {
         EventJpaEntity entityToSave = mapper.toJpaEntity(event);
         EventJpaEntity saved = eventJpaRepository.save(entityToSave);
+        log.info("DB: saved event: {}", saved);
         return mapper.toDto(saved);
     }
 
     @Override
     @CachePut(cacheNames = EVENT, key = "#result.id")
     public Event update(Event event) {
-        log.info("updating event: {}. New description: {}", event.id(), event.description());
         EventJpaEntity eventFromDb = eventJpaRepository.findById(event.id())
                 .orElseThrow(() -> new EventNotFoundException(event.id().toString()));
         eventFromDb.setDescription(event.description());
         EventJpaEntity saved = eventJpaRepository.save(eventFromDb);
+        log.info("updated event: {}", event);
         return mapper.toDto(saved);
     }
 
